@@ -21,16 +21,36 @@
     </table>
 
     <ul>
+        {% for message in messages %}
+            <li>
+                {{ message.body }} | par {{ message.user.username }}
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('messages_edit', { 'id': message.id }) }}">Edit</a>
+                    {{ form_start(delete_message[message.id]) }}
+                        <input type="submit" value="Delete">
+                    {{ form_end(delete_message[message.id]) }}
+                {% endif %}
+            </li>   
+        {% endfor %}
+    </ul>
+
+    <ul>
+        <li>
+            <a href="{{ path('messages_new', {'ticket_id' : ticket.id}) }}">Create new message</a>
+        </li>
         <li>
             <a href="{{ path('tickets_index') }}">Back to the list</a>
         </li>
-        <li>
-            <a href="{{ path('tickets_edit', { 'id': ticket.id }) }}">Edit</a>
-        </li>
-        <li>
-            {{ form_start(delete_form) }}
-                <input type="submit" value="Delete">
-            {{ form_end(delete_form) }}
-        </li>
+        {% if is_granted('ROLE_ADMIN') %}
+            <li>
+                <a href="{{ path('tickets_edit', { 'id': ticket.id }) }}">Edit</a>
+            </li>
+
+            <li>
+                {{ form_start(delete_form) }}
+                    <input type="submit" value="Delete">
+                {{ form_end(delete_form) }}
+            </li>
+        {% endif %}
     </ul>
 {% endblock %}

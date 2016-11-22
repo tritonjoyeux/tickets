@@ -2,6 +2,7 @@
 
 namespace TicketsBundle\Controller;
 
+use TicketsBundle\Entity\Messages;
 use TicketsBundle\Entity\Tickets;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
@@ -39,7 +40,8 @@ class TicketsController extends Controller
      */
     public function newAction(Request $request)
     {
-        $ticket = new Ticket();
+        $ticket = new Tickets();
+        $ticket->addUser($this->getUser());
         $form = $this->createForm('TicketsBundle\Form\TicketsType', $ticket);
         $form->handleRequest($request);
 
@@ -66,10 +68,16 @@ class TicketsController extends Controller
     public function showAction(Tickets $ticket)
     {
         $deleteForm = $this->createDeleteForm($ticket);
-
+        $messages = $this->getDoctrine()->getRepository('TicketsBundle:Messages')->findByTicket($ticket->getId());
+        $deleteMessage = [];
+        foreach ($messages as $message){
+           $deleteMessage[$message->getId()] = $this->createDeleteMessage($message)->createView();
+        }
         return $this->render('tickets/show.html.twig', array(
             'ticket' => $ticket,
             'delete_form' => $deleteForm->createView(),
+            'delete_message' => $deleteMessage,
+            'messages' => $messages,
         ));
     }
 
@@ -81,6 +89,9 @@ class TicketsController extends Controller
      */
     public function editAction(Request $request, Tickets $ticket)
     {
+        if (!$this->getUser()->hasRole('ROLE_ADMIN')){
+            return $this->redirectToRoute('tickets_index');
+        }
         $deleteForm = $this->createDeleteForm($ticket);
         $editForm = $this->createForm('TicketsBundle\Form\TicketsType', $ticket);
         $editForm->handleRequest($request);
@@ -106,6 +117,9 @@ class TicketsController extends Controller
      */
     public function deleteAction(Request $request, Tickets $ticket)
     {
+        if (!$this->getUser()->hasRole('ROLE_ADMIN')){
+            return $this->redirectToRoute('tickets_index');
+        }
         $form = $this->createDeleteForm($ticket);
         $form->handleRequest($request);
 
@@ -132,5 +146,14 @@ class TicketsController extends Controller
             ->setMethod('DELETE')
             ->getForm()
         ;
+    }
+
+    private function createDeleteMessage(Messages $message)
+    {
+        return $this->createFormBuilder()
+            ->setAction($this->generateUrl('messages_delete', array('id' => $message->getId())))
+            ->setMethod('DELETE')
+            ->getForm()
+            ;
     }
 }

@@ -36,11 +36,14 @@ class Tickets
     private $created;
 
     /**
-     * @ORM\OneToMany(targetEntity="TicketsBundle\Entity\Messages", mappedBy="advert")
-     * @ORM\JoinColumn(nullable=false)
+     * @ORM\OneToMany(targetEntity="Messages", mappedBy="ticket")
      */
     private $messages;
 
+    /**
+     * @ORM\ManyToMany(targetEntity="UserBundle\Entity\User")
+     */
+    private $user;
 
     /**
      * Get id
@@ -139,5 +142,39 @@ class Tickets
     public function getMessages()
     {
         return $this->messages;
+    }
+
+    /**
+     * Add user
+     *
+     * @param \UserBundle\Entity\User $user
+     *
+     * @return Tickets
+     */
+    public function addUser(\UserBundle\Entity\User $user)
+    {
+        $this->user[] = $user;
+
+        return $this;
+    }
+
+    /**
+     * Remove user
+     *
+     * @param \UserBundle\Entity\User $user
+     */
+    public function removeUser(\UserBundle\Entity\User $user)
+    {
+        $this->user->removeElement($user);
+    }
+
+    /**
+     * Get user
+     *
+     * @return \Doctrine\Common\Collections\Collection
+     */
+    public function getUser()
+    {
+        return $this->user;
     }
 }

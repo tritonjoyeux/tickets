@@ -23,9 +23,11 @@
                         <li>
                             <a href="{{ path('tickets_show', { 'id': ticket.id }) }}">show</a>
                         </li>
-                        <li>
-                            <a href="{{ path('tickets_edit', { 'id': ticket.id }) }}">edit</a>
-                        </li>
+                        {% if is_granted('ROLE_ADMIN') %}
+                            <li>
+                                <a href="{{ path('tickets_edit', { 'id': ticket.id }) }}">edit</a>
+                            </li>
+                        {% endif %}
                     </ul>
                 </td>
             </tr>
